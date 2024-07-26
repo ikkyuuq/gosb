@@ -17,7 +17,13 @@ type SpinnerModel struct {
 	Text    string
 	Spinner spinner.Model
 	Done    bool
+	State   int
 }
+
+const (
+	StatePrepare = iota
+	StateDone
+)
 
 func NewSpinner(s string) SpinnerModel {
 	return InitialSpinner(s)
@@ -30,6 +36,7 @@ func InitialSpinner(s string) SpinnerModel {
 		Text:    textStyle(s),
 		Spinner: sp,
 		Done:    false,
+		State:   StatePrepare,
 	}
 }
 
@@ -37,8 +44,15 @@ func (m SpinnerModel) Init() tea.Cmd {
 	return m.Spinner.Tick
 }
 
-func (m SpinnerModel) Update(msg tea.Msg) (SpinnerModel, tea.Cmd) {
-	return m, nil
+func (m SpinnerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case spinner.TickMsg:
+		var cmd tea.Cmd
+		m.Spinner, cmd = m.Spinner.Update(msg)
+		return m, cmd
+	default:
+		return m, nil
+	}
 }
 
 func (m SpinnerModel) View() (s string) {
