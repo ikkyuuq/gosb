@@ -6,10 +6,13 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type FormModel struct {
-	form *huh.Form
+	form                *huh.Form
+	formStyle           lipgloss.Style
+	formHeaderTextStyle lipgloss.Style
 }
 
 type FormData struct {
@@ -25,6 +28,7 @@ func NewForm() FormModel {
 
 func initialForm() FormModel {
 	m := FormModel{}
+	m.formStyle = lipgloss.NewStyle().Align(lipgloss.Center).BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("63")).Padding(2, 2)
 	dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("cannot find your current directory")
@@ -35,9 +39,7 @@ func initialForm() FormModel {
 	m.form = huh.NewForm(
 		huh.NewGroup(
 			huh.NewNote().Title("GOSB").
-				Description("A common question developers new to Go have is “How do I organize my Go project?”\nAnd, Yes! that why the goal of GOSB is to build your project structure easier,\nyou might learn by yourself from go.dev\n\nHuge credit: Melkey\n\n").Next(true).NextLabel("Let's Build!"),
-		),
-		huh.NewGroup(
+				Description("A common question developers new to Go have is “How do I organize my Go project?”\nAnd, Yes! that why the goal of GOSB is to build your project structure easier,\nyou might learn by yourself from go.dev\n\nHuge credit: Melkey"),
 			huh.NewInput().Title("Project Name").
 				Value(&fd.ProjectName).Key("projectName").
 				Description("Project directory is on: ").
@@ -51,14 +53,12 @@ func initialForm() FormModel {
 			huh.NewSelect[string]().Title("Database").Description("Choose a database").
 				Options(huh.NewOptions("None", "MySQL", "MongoDB", "ProtgreSQL")...).
 				Value(&fd.Database).Key("database"),
-		),
-		huh.NewGroup(
 			huh.NewSelect[string]().Title("Framework").Description("Choose a Go web framework").
 				Options(huh.NewOptions("Standard Library", "Chi", "Echo", "Fiber", "Gin", "Gorilla", "HttpRouter")...).
 				Value(&fd.Framework).Key("framework"),
 			huh.NewConfirm().Title("Are you sure?").Affirmative("Build!").Negative("Wait!"),
 		),
-	)
+	).WithWidth(110)
 	return m
 }
 
@@ -81,5 +81,5 @@ func (m FormModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m FormModel) View() string {
-	return m.form.View()
+	return m.formStyle.Render(m.form.View())
 }
