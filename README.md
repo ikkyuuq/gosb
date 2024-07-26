@@ -1,1 +1,3 @@
-# gosb
+# gosb (Go Structure Builder)
+
+## Development...
